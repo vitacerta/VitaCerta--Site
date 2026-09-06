@@ -62,7 +62,7 @@
   function validateArticle(article) {
     const errors = [];
     const missing = required(article, [
-      'article_id', 'title', 'url', 'category', 'cluster',
+      'article_id', 'title', 'url', 'category',
       'content_type', 'publication_status'
     ]);
     if (missing.length) errors.push(`Campos obrigatórios ausentes: ${missing.join(', ')}`);
