@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0",
+  "sources": [
+    {
+      "source_id": "vitacerta-content",
+      "source_name": "Conteúdo VitaCerta",
+      "source_type": "interno",
+      "provider": "VitaCerta",
+      "url": "https://vitacerta.github.io/VitaCerta--Site/",
+      "api_or_manual": "repositório",
+      "collection_frequency": "sob demanda",
+      "coverage": "artigos, páginas, categorias, clusters e status editorial",
+      "last_successful_collection": null,
+      "status": "ATIVA",
+      "quality_status": "PENDENTE",
+      "notes": "Fonte canônica inicial do conteúdo publicado no projeto VitaCerta."
+    },
+    {
+      "source_id": "ga4",
+      "source_name": "Google Analytics 4",
+      "source_type": "interno",
+      "provider": "Google",
+      "url": null,
+      "api_or_manual": "API",
+      "collection_frequency": "diária",
+      "coverage": "aquisição, comportamento, origem, dispositivo e geografia",
+      "last_successful_collection": null,
+      "status": "NÃO CONECTADA",
+      "quality_status": "NAO_VERIFICADO",
+      "notes": null
+    },
+    {
+      "source_id": "gsc",
+      "source_name": "Google Search Console",
+      "source_type": "interno",
+      "provider": "Google",
+      "url": null,
+      "api_or_manual": "API",
+      "collection_frequency": "diária",
+      "coverage": "consultas, páginas, impressões, cliques, CTR e posição média",
+      "last_successful_collection": null,
+      "status": "NÃO CONECTADA",
+      "quality_status": "NAO_VERIFICADO",
+      "notes": null
+    },
+    {
+      "source_id": "adsense",
+      "source_name": "Google AdSense",
+      "source_type": "interno",
+      "provider": "Google",
+      "url": null,
+      "api_or_manual": "API",
+      "collection_frequency": "diária",
+      "coverage": "impressões, cliques, CTR, RPM e receita",
+      "last_successful_collection": null,
+      "status": "NÃO CONECTADA",
+      "quality_status": "NAO_VERIFICADO",
+      "notes": null
+    }
+  ]
+}
