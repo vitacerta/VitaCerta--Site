@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0",
+  "articles": [],
+  "article_schema": {
+    "required": [
+      "article_id",
+      "title",
+      "url",
+      "category",
+      "content_type",
+      "publication_status"
+    ],
+    "fields": [
+      "article_id",
+      "title",
+      "slug",
+      "url",
+      "language",
+      "category",
+      "cluster",
+      "content_type",
+      "published_at",
+      "updated_at",
+      "publication_status",
+      "seo_title",
+      "meta_description",
+      "featured_image",
+      "source_origin",
+      "legacy_url",
+      "migration_status",
+      "last_synced_at"
+    ]
+  },
+  "allowed_publication_status": [
+    "RASCUNHO",
+    "PUBLICADO",
+    "ARQUIVADO"
+  ],
+  "allowed_migration_status": [
+    "NAO_APLICAVEL",
+    "PENDENTE",
+    "MIGRADO",
+    "VALIDADO",
+    "ERRO"
+  ]
+}
