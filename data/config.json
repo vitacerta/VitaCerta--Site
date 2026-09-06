@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "project": "VitaCerta Radar",
+  "environment": "production",
+  "missing_data_policy": "DADO NÃO DISPONÍVEL",
+  "collection_error_policy": "ERRO DE COLETA",
+  "production_engine": {
+    "external_intelligence_weight": 0.75,
+    "internal_intelligence_weight": 0.25,
+    "weights_are_configurable": true,
+    "weights_affect_factual_truth": false
+  },
+  "evidence_levels": {
+    "A": "APURADO",
+    "B": "CALCULADO",
+    "C": "INFERÊNCIA IDENTIFICADA",
+    "D": "HIPÓTESE"
+  },
+  "source_statuses": [
+    "ATIVA",
+    "PAUSADA",
+    "ERRO",
+    "NÃO CONECTADA"
+  ],
+  "quality_statuses": [
+    "VALIDO",
+    "PENDENTE",
+    "INVALIDO",
+    "NAO_VERIFICADO"
+  ],
+  "updated_at": "2026-09-06"
+}
