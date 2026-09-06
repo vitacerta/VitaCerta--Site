@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "decisions": [],
+  "decision_schema": {
+    "required": [
+      "decision_id",
+      "decision_type",
+      "decision",
+      "decided_at",
+      "responsible"
+    ],
+    "fields": [
+      "decision_id",
+      "decision_type",
+      "decision",
+      "reason",
+      "evidence_references",
+      "previous_value",
+      "new_value",
+      "effective_from",
+      "effective_until",
+      "decided_at",
+      "responsible",
+      "result",
+      "result_measured_at",
+      "notes"
+    ]
+  }
+}
