@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "records": [],
+  "record_schema": {
+    "required": [
+      "id",
+      "source_type",
+      "source_id",
+      "source_name",
+      "metric",
+      "dimension",
+      "collected_at",
+      "value",
+      "data_class",
+      "quality_status",
+      "last_updated"
+    ],
+    "fields": [
+      "id",
+      "source_type",
+      "source_id",
+      "source_name",
+      "source_url",
+      "metric",
+      "dimension",
+      "dimension_id",
+      "period_start",
+      "period_end",
+      "collected_at",
+      "value",
+      "unit",
+      "data_class",
+      "formula",
+      "inference_rule",
+      "evidence_level",
+      "quality_status",
+      "raw_reference",
+      "last_updated"
+    ]
+  }
+}
