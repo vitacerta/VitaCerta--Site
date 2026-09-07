@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "production_queue": [],
+  "production_schema": {
+    "required": ["production_id", "topic", "language", "status", "created_at"],
+    "fields": [
+      "production_id", "opportunity_id", "topic", "language", "category", "cluster",
+      "search_intent", "external_weight", "internal_weight", "external_evidence",
+      "internal_evidence", "editorial_brief", "recommended_angle", "recommended_format",
+      "target_audience", "seo_requirements", "evidence_requirements", "internal_link_requirements",
+      "monetization_requirements", "status", "created_at", "updated_at", "approved_by"
+    ]
+  },
+  "allowed_status": ["AGUARDANDO_BRIEF", "BRIEF_PRONTO", "APROVADO", "EM_REDACAO", "EM_REVISAO", "PRONTO_PARA_PUBLICAR", "PUBLICADO", "CANCELADO"],
+  "policy": {
+    "external_weight": 0.75,
+    "internal_weight": 0.25,
+    "automatic_publication": false,
+    "factual_claims_require_evidence": true,
+    "missing_data_policy": "DADO NÃO DISPONÍVEL"
+  }
+}
