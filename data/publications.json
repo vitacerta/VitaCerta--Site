@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0",
+  "publications": [],
+  "publication_schema": {
+    "required": ["publication_id", "production_id", "title", "slug", "language", "status", "created_at"],
+    "fields": [
+      "publication_id", "production_id", "opportunity_id", "article_id", "title", "slug", "language",
+      "category", "cluster", "seo_title", "meta_description", "featured_image", "html_path", "public_url",
+      "source_references", "internal_links", "monetization_links", "review_status", "approved_by",
+      "published_at", "status", "created_at", "updated_at"
+    ]
+  },
+  "allowed_status": ["RASCUNHO", "EM_REVISAO", "APROVADO", "PUBLICADO", "ERRO"],
+  "policy": {
+    "automatic_publication": false,
+    "requires_review": true,
+    "requires_unique_slug": true,
+    "requires_public_url_after_publish": true,
+    "missing_data_policy": "DADO NÃO DISPONÍVEL"
+  }
+}
