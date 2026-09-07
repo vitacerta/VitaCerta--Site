@@ -1,37 +1,42 @@
 const OPENAI_URL = 'https://api.openai.com/v1/responses';
 
-function doPost(e) {
-  try {
-    const body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-    if (body.action !== 'generate_article') {
-      return json_({ ok: false, error: 'Ação inválida.' });
-    }
+function doGet() {
+  return HtmlService.createHtmlOutputFromFile('Index')
+    .setTitle('VitaCerta — Motor Editorial')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
 
+function generateArticle(request) {
+  try {
+    const body = request || {};
     const section = clean_(body.section, 40);
     const topic = clean_(body.topic, 300);
     const format = clean_(body.format || 'artigo', 40);
     const notes = clean_(body.notes || '', 1500);
 
     if (!section || !topic) {
-      return json_({ ok: false, error: 'Seção e tema são obrigatórios.' });
+      return { ok: false, error: 'Seção e tema são obrigatórios.' };
     }
 
     const allowedSections = ['Saúde', 'Nutrição', 'Movimento', 'Mente', 'Longevidade'];
     if (!allowedSections.includes(section)) {
-      return json_({ ok: false, error: 'Seção editorial inválida.' });
+      return { ok: false, error: 'Seção editorial inválida.' };
     }
 
-    const apiKey = PropertiesService.getScriptProperties().getProperty('OPENAI_API_KEY');
+    const props = PropertiesService.getScriptProperties();
+    const apiKey = props.getProperty('OPENAI_API_KEY');
+    const model = props.getProperty('OPENAI_MODEL');
+
     if (!apiKey) {
-      return json_({ ok: false, error: 'OPENAI_API_KEY não configurada no Apps Script.' });
+      return { ok: false, error: 'OPENAI_API_KEY não configurada nas Propriedades do script.' };
     }
-
-    const model = PropertiesService.getScriptProperties().getProperty('OPENAI_MODEL') || 'gpt-5.6';
-    const prompt = buildPrompt_(section, topic, format, notes);
+    if (!model) {
+      return { ok: false, error: 'OPENAI_MODEL não configurado nas Propriedades do script.' };
+    }
 
     const payload = {
       model: model,
-      input: prompt,
+      input: buildPrompt_(section, topic, format, notes),
       reasoning: { effort: 'medium' },
       tools: [{ type: 'web_search_preview' }]
     };
@@ -50,21 +55,38 @@ function doPost(e) {
     try { data = JSON.parse(raw); } catch (_) { data = null; }
 
     if (status < 200 || status >= 300 || !data) {
-      return json_({ ok: false, error: 'Falha na geração.', status: status, detail: raw.slice(0, 1200) });
+      return {
+        ok: false,
+        error: 'Falha na geração pela API.',
+        status: status,
+        detail: raw.slice(0, 1200)
+      };
     }
 
     const text = extractOutputText_(data);
     if (!text) {
-      return json_({ ok: false, error: 'A API respondeu sem texto utilizável.' });
+      return { ok: false, error: 'A API respondeu sem texto utilizável.' };
     }
 
-    return json_({
+    return {
       ok: true,
       article: text,
       model: data.model || model,
       response_id: data.id || null,
       generated_at: new Date().toISOString()
-    });
+    };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+function doPost(e) {
+  try {
+    const body = JSON.parse((e && e.postData && e.postData.contents) || '{}');
+    if (body.action !== 'generate_article') {
+      return json_({ ok: false, error: 'Ação inválida.' });
+    }
+    return json_(generateArticle(body));
   } catch (err) {
     return json_({ ok: false, error: String(err && err.message ? err.message : err) });
   }
@@ -75,7 +97,7 @@ function buildPrompt_(section, topic, format, notes) {
     'Você é o Motor Editorial do VitaCerta, um site brasileiro de saúde e bem-estar.',
     '',
     'MISSÃO',
-    'Produzir um rascunho editorial completo, publicável após revisão humana, em português do Brasil.',
+    'Produzir um rascunho editorial completo, publicável somente após revisão humana, em português do Brasil.',
     '',
     'SEÇÃO PRINCIPAL: ' + section,
     'TEMA: ' + topic,
@@ -86,10 +108,10 @@ function buildPrompt_(section, topic, format, notes) {
     '- Pesquise fontes atuais e confiáveis antes de escrever.',
     '- Para alegações de saúde, priorize órgãos oficiais, sociedades médicas e literatura científica revisada por pares.',
     '- Não transforme associação em causalidade e não exagere conclusões.',
-    '- Escreva em linguagem humana, clara e acessível, sem parecer texto genérico de IA.',
+    '- Escreva em linguagem humana, clara, interessante e acessível, sem texto genérico de IA.',
     '- Não faça diagnóstico individual e não substitua orientação profissional.',
     '- Não invente dados, estudos, números, URLs ou referências.',
-    '- Use monetização somente se houver encaixe natural com o tema.',
+    '- Use monetização somente quando houver encaixe natural com o tema.',
     '- O conteúdo deve pertencer a apenas uma seção principal: Saúde, Nutrição, Movimento, Mente ou Longevidade.',
     '- Se o formato for Ciência Vital, inclua no início exatamente: “Uma série editorial que aproxima a ciência da vida real. Partimos de pesquisas científicas para transformar descobertas em conhecimento, porque acreditamos que conhecimento nos ajuda a fazer escolhas mais conscientes.”',
     '',
@@ -99,13 +121,13 @@ function buildPrompt_(section, topic, format, notes) {
     '3. Slug sugerido',
     '4. Seção',
     '5. Cluster sugerido',
-    '6. Palavra-chave principal e secundárias',
+    '6. Palavra-chave principal e palavras-chave secundárias',
     '7. Artigo completo em HTML simples pronto para publicação, com H1/H2/H3, parágrafos e um blockquote de destaque sem ícones',
     '8. Sugestões de links internos apenas quando houver encaixe real',
     '9. Referências utilizadas, com nome da fonte e URL',
     '10. Oportunidade de monetização, somente se pertinente',
     '',
-    'IMPORTANTE: este resultado é um RASCUNHO e depende de aprovação humana antes da publicação.'
+    'IMPORTANTE: este resultado é um RASCUNHO. Não declare o conteúdo como publicado.'
   ].filter(Boolean).join('\n');
 }
 
