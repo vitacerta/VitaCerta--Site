@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VitaCerta — Admin Radar</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f7f8f7;color:#26332e}.wrap{max-width:1240px;margin:auto;padding:28px 20px 60px}header{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:28px}.brand{font-size:27px;font-weight:800;color:#1f3d32}.brand span{color:#78917f}.muted{color:#718078;font-size:13px}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:#fff;border:1px solid #e1e6e3;border-radius:14px;padding:18px}.kpi{font-size:30px;font-weight:800;color:#1f3d32;margin-top:8px}.section{margin-top:24px}.section h2{font-size:18px;color:#1f3d32;margin:0 0 12px}.status{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef3ef;color:#45614f;font-size:12px;font-weight:700}.warn{background:#f6f0e5;color:#80662d}.table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #e1e6e3}.table th,.table td{text-align:left;padding:12px 14px;border-bottom:1px solid #edf0ee;font-size:13px}.table th{background:#f4f7f5;color:#506259}.empty{padding:25px;text-align:center;color:#7c8982}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.tab{border:1px solid #dce3df;background:white;border-radius:9px;padding:8px 12px;font-size:13px}.active{background:#1f3d32;color:white;border-color:#1f3d32}@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.grid{grid-template-columns:1fr}header{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body><div class="wrap">
+<header><div><div class="brand">VitaCerta <span>Radar</span></div><div class="muted">Admin • inteligência editorial e performance</div></div><div id="updated" class="muted">Carregando dados...</div></header>
+<div class="tabs"><button class="tab active">Visão geral</button><button class="tab">Performance</button><button class="tab">Oportunidades</button><button class="tab">Produção</button><button class="tab">Publicações</button><button class="tab">Aprendizado</button></div>
+<div class="grid">
+<div class="card"><div class="muted">Artigos registrados</div><div class="kpi" id="articles">—</div></div>
+<div class="card"><div class="muted">Métricas coletadas</div><div class="kpi" id="records">—</div></div>
+<div class="card"><div class="muted">Oportunidades</div><div class="kpi" id="opportunities">—</div></div>
+<div class="card"><div class="muted">Fila de produção</div><div class="kpi" id="production">—</div></div>
+</div>
+<div class="section"><h2>Fontes de dados</h2><table class="table"><thead><tr><th>Fonte</th><th>Tipo</th><th>Status</th><th>Qualidade</th></tr></thead><tbody id="sources"></tbody></table></div>
+<div class="section"><h2>Performance dos artigos</h2><table class="table"><thead><tr><th>Artigo</th><th>Categoria</th><th>Visualizações</th><th>CTR</th><th>Receita</th></tr></thead><tbody id="performance"></tbody></table></div>
+<div class="section"><h2>Estado operacional</h2><div class="grid"><div class="card"><div class="muted">Publicações registradas</div><div class="kpi" id="publications">—</div></div><div class="card"><div class="muted">Registros de aprendizado</div><div class="kpi" id="learning">—</div></div><div class="card"><div class="muted">Dados externos</div><div class="kpi" id="external">—</div></div><div class="card"><div class="muted">Dados internos</div><div class="kpi">25%</div><div class="muted">Peso editorial atual</div></div></div></div>
+</div>
+<script>
+const ROOT='../'; const MISSING='DADO NÃO DISPONÍVEL';
+async function json(name){const r=await fetch(ROOT+'data/'+name,{cache:'no-store'});if(!r.ok)throw new Error(name);return r.json()}
+function val(v){return v===null||v===undefined?'—':v}
+function metric(records,id,name){const a=records.filter(r=>r.dimension==='article'&&r.dimension_id===id&&r.metric===name&&r.quality_status!=='INVALIDO'&&r.data_class!=='D');return a.length?a.sort((x,y)=>new Date(y.last_updated)-new Date(x.last_updated))[0].value:MISSING}
+function displayMetric(v){return v===MISSING?'<span class="status warn">Dado não disponível</span>':v}
+async function init(){try{const [a,r,s,o,p,pub,l]=await Promise.all([json('articles.json'),json('records.json'),json('sources.json'),json('opportunities.json'),json('production-queue.json'),json('publications.json'),json('learning.json')]);
+const articles=a.articles||[],records=r.records||[],sources=s.sources||[],ops=o.opportunities||[],prod=p.production_queue||[],publications=pub.publications||[],learning=l.learning_records||[];
+document.getElementById('articles').textContent=articles.length;document.getElementById('records').textContent=records.length;document.getElementById('opportunities').textContent=ops.length;document.getElementById('production').textContent=prod.length;document.getElementById('publications').textContent=publications.length;document.getElementById('learning').textContent=learning.length;document.getElementById('external').innerHTML=records.some(x=>x.source_type==='externo')?'Ativo':'<span class="status warn">Aguardando</span>';
+document.getElementById('sources').innerHTML=sources.map(x=>`<tr><td>${x.source_name}</td><td>${x.source_type}</td><td><span class="status ${x.status==='NÃO CONECTADA'?'warn':''}">${x.status}</span></td><td>${x.quality_status}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">Nenhuma fonte registrada</td></tr>';
+document.getElementById('performance').innerHTML=articles.map(x=>`<tr><td><strong>${x.title}</strong></td><td>${val(x.category)}</td><td>${displayMetric(metric(records,x.article_id,'views'))}</td><td>${displayMetric(metric(records,x.article_id,'ctr'))}</td><td>${displayMetric(metric(records,x.article_id,'revenue'))}</td></tr>`).join('')||'<tr><td colspan="5" class="empty">Nenhum artigo registrado</td></tr>';
+document.getElementById('updated').textContent='Atualizado • '+new Date().toLocaleString('pt-BR');}catch(e){document.getElementById('updated').textContent='Erro ao carregar dados';console.error(e)}}init();
+</script></body></html>
