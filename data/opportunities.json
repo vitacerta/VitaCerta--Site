@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "opportunities": [],
+  "opportunity_schema": {
+    "required": ["opportunity_id", "topic", "category", "status", "created_at"],
+    "fields": [
+      "opportunity_id", "topic", "category", "cluster", "language", "search_intent",
+      "external_score", "internal_score", "combined_score", "external_evidence",
+      "internal_evidence", "recommended_angle", "recommended_format", "monetization_fit",
+      "status", "created_at", "updated_at"
+    ]
+  },
+  "allowed_status": ["CANDIDATA", "PRIORIZADA", "EM_PRODUCAO", "PUBLICADA", "DESCARTADA"],
+  "scoring_policy": {
+    "external_weight": 0.75,
+    "internal_weight": 0.25,
+    "missing_score_policy": "DADO NÃO DISPONÍVEL",
+    "weights_do_not_change_factual_truth": true
+  }
+}
