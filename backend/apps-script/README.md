@@ -2,31 +2,51 @@
 
 Este diretório contém a camada de servidor usada pela Central de Produção do Radar.
 
-## Objetivo
+## Arquitetura
 
-Receber uma solicitação editorial da página `admin/producao.html`, chamar a OpenAI de forma segura e devolver o rascunho para revisão humana.
+`Radar no GitHub Pages` → `Apps Script` → `OpenAI Responses API` → `rascunho no Radar` → `aprovação manual` → `publicação`
 
-A chave da API **não deve** ser colocada no GitHub Pages nem em qualquer arquivo público deste repositório.
+A chave da API **nunca deve** ser colocada no GitHub Pages nem em qualquer arquivo público deste repositório. Ela fica em `PropertiesService` do Google Apps Script.
+
+O arquivo `Index.html` não é uma segunda interface de produção. Ele funciona como uma ponte entre a página `admin/producao.html` e o Apps Script, usando `postMessage` + `google.script.run`, evitando expor a chave no navegador.
 
 ## Configuração no Google Apps Script
 
 1. Crie um novo projeto no Google Apps Script.
 2. Substitua o conteúdo de `Código.gs` pelo conteúdo de `backend/apps-script/Code.gs`.
-3. Em **Configurações do projeto > Propriedades do script**, crie:
+3. Crie um arquivo HTML chamado `Index` e cole o conteúdo de `backend/apps-script/Index.html`.
+4. Em **Configurações do projeto > Propriedades do script**, crie:
    - `OPENAI_API_KEY` = sua chave da API OpenAI.
-   - `OPENAI_MODEL` = modelo que deseja usar. Se omitido, o código tentará `gpt-5.6`.
-4. Clique em **Implantar > Nova implantação > App da Web**.
-5. Execute como a conta proprietária do script.
-6. Defina a política de acesso compatível com a forma de autenticação escolhida para o Radar.
-7. Copie a URL `/exec` da implantação.
-8. Informe essa URL na Central de Produção do VitaCerta quando o campo de endpoint estiver habilitado.
+   - `OPENAI_MODEL` = opcional. Se omitido, o backend usa `gpt-5.6-terra`.
+5. Clique em **Implantar > Nova implantação > App da Web**.
+6. Execute como a conta proprietária do script.
+7. Sempre que a opção estiver disponível e funcionar no navegador usado pelo administrador, prefira restringir o acesso ao próprio administrador em vez de deixar a implantação pública.
+8. Copie a URL `/exec` da implantação.
+9. Essa URL será cadastrada na Central de Produção do VitaCerta. A URL do Apps Script não é uma chave secreta; a `OPENAI_API_KEY` continua somente nas Propriedades do script.
 
 ## Segurança
 
-O backend protege a chave da OpenAI porque ela permanece em `PropertiesService` do Apps Script. Entretanto, uma implantação pública do Apps Script sem autenticação pode sofrer uso indevido. Antes de colocar o Motor em produção contínua, aplique autenticação/restrição de acesso ao endpoint.
+O backend protege a chave da OpenAI porque ela permanece no Apps Script. O `Index.html` aceita comandos do parent apenas quando a origem é `https://vitacerta.github.io`.
 
-## Fluxo previsto
+Isso reduz exposição acidental, mas não substitui o controle de acesso do próprio Apps Script. Evite implantação pública irrestrita sempre que for possível usar uma implantação acessível somente pela conta administradora.
 
-`SOLICITADO` → `GERANDO` → `RASCUNHO` → `APROVADO` → `PUBLICADO`
+## Fluxo editorial 1.0
 
-A geração automática nunca publica o conteúdo. A publicação exige aprovação humana explícita no Radar.
+A especificação funcional do VitaCerta segue aprovação humana obrigatória:
+
+`Solicitação` → `Briefing` → `aprovação do briefing` → `Geração` → `revisão/reescrita` → `aprovação do texto` → `Capa` → `aprovação da capa` → `Revisão final` → `Publicação` → `Aprendizado`
+
+Nenhuma geração publica automaticamente. Nenhum aprendizado altera o padrão editorial sem aprovação manual do administrador.
+
+## Estado atual deste backend
+
+O backend já possui:
+
+- `healthCheck()` para validar configuração;
+- `generateArticle(request)` para gerar o pacote editorial;
+- pesquisa web via ferramenta da Responses API;
+- Prompt Mestre VitaCerta em Modo Externo Provisório;
+- retorno estruturado com artigo, SEO, slug, seção, cluster, palavras-chave, referências, links internos sugeridos e oportunidade de monetização;
+- ponte por `postMessage` preparada para a Central de Produção.
+
+A geração de capa, revisão/re-escrita e publicação no GitHub serão conectadas nas próximas camadas.
