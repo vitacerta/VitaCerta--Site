@@ -7,13 +7,13 @@
       "source_type": "interno",
       "provider": "VitaCerta",
       "url": "https://vitacerta.github.io/VitaCerta--Site/",
-      "api_or_manual": "repositório",
+      "api_or_manual": "repositório + descoberta pública validada",
       "collection_frequency": "sob demanda",
       "coverage": "artigos, páginas, categorias, clusters e status editorial",
-      "last_successful_collection": null,
+      "last_successful_collection": "2026-09-07",
       "status": "ATIVA",
-      "quality_status": "PENDENTE",
-      "notes": "Fonte canônica inicial do conteúdo publicado no projeto VitaCerta."
+      "quality_status": "VALIDADO_PARCIAL",
+      "notes": "Primeira coleta interna registrada com 9 artigos editoriais confirmados no VitaCerta público. A base ainda é parcial e será ampliada conforme a migração do Blogger avançar."
     },
     {
       "source_id": "ga4",
