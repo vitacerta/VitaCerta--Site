@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VitaCerta — Motor Editorial</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f7f8f7;color:#26332e}.wrap{padding:18px}.card{background:#fff;border:1px solid #e1e6e3;border-radius:14px;padding:18px}.brand{font-size:22px;font-weight:800;color:#1f3d32;margin-bottom:4px}.brand span{color:#78917f}.muted{color:#718078;font-size:13px}label{display:block;font-size:12px;font-weight:700;margin:12px 0 5px}input,select,textarea{width:100%;border:1px solid #dce3df;border-radius:9px;padding:10px;background:#fff;color:#26332e}textarea{min-height:90px;resize:vertical}.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer;background:#1f3d32;color:#fff;margin-top:14px}.btn:disabled{opacity:.45;cursor:not-allowed}.notice{margin-top:14px;padding:11px 13px;border-radius:10px;background:#eef3ef;color:#45614f;font-size:13px}.error{background:#fff0f0;color:#8b3434}.editor{margin-top:16px;min-height:360px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.45}.actions{display:flex;gap:8px;flex-wrap:wrap}.secondary{background:#eef3ef;color:#365044}.status{font-weight:700}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <div class="brand">VitaCerta <span>Motor Editorial</span></div>
+    <div class="muted">Geração segura de rascunhos com revisão humana obrigatória.</div>
+
+    <label>Seção</label>
+    <select id="section"><option>Saúde</option><option>Nutrição</option><option>Movimento</option><option>Mente</option><option>Longevidade</option></select>
+
+    <label>Tema</label>
+    <input id="topic" placeholder="Informe o tema do conteúdo">
+
+    <label>Formato</label>
+    <select id="format"><option value="artigo">Artigo</option><option value="review">Review</option><option value="guia">Guia</option><option value="ciencia-vital">Ciência Vital</option></select>
+
+    <label>Orientações opcionais</label>
+    <textarea id="notes" placeholder="Ângulo, público, produto, observações editoriais..."></textarea>
+
+    <div class="actions">
+      <button class="btn" id="generate">Gerar rascunho</button>
+      <button class="btn secondary" id="copy" disabled>Copiar rascunho</button>
+    </div>
+
+    <div id="message" class="notice">Status: <span class="status">pronto para receber uma solicitação.</span></div>
+
+    <label>Rascunho gerado</label>
+    <textarea id="draft" class="editor" placeholder="O rascunho aparecerá aqui para revisão e aprovação." readonly></textarea>
+  </div>
+</div>
+<script>
+const generate=document.getElementById('generate'),copy=document.getElementById('copy'),message=document.getElementById('message'),draft=document.getElementById('draft');
+function setMsg(text,isError=false){message.className='notice'+(isError?' error':'');message.innerHTML='Status: <span class="status">'+text+'</span>'}
+generate.onclick=()=>{
+  const req={section:section.value,topic:topic.value.trim(),format:format.value,notes:notes.value.trim()};
+  if(!req.topic){setMsg('informe o tema antes de gerar.',true);return}
+  generate.disabled=true;copy.disabled=true;setMsg('gerando e pesquisando fontes...');draft.value='';
+  google.script.run.withSuccessHandler(res=>{
+    generate.disabled=false;
+    if(!res||!res.ok){setMsg((res&&res.error)||'falha inesperada na geração.',true);return}
+    draft.value=res.article||'';copy.disabled=!draft.value;setMsg('rascunho gerado. Revise antes de aprovar.');
+    if(window.parent!==window){window.parent.postMessage({type:'VITACERTA_DRAFT',payload:{article:res.article||'',model:res.model||'',response_id:res.response_id||'',generated_at:res.generated_at||new Date().toISOString(),section:req.section,topic:req.topic,format:req.format,notes:req.notes}},'*')}
+  }).withFailureHandler(err=>{generate.disabled=false;setMsg((err&&err.message)||String(err),true)}).generateArticle(req);
+};
+copy.onclick=async()=>{try{await navigator.clipboard.writeText(draft.value);setMsg('rascunho copiado.')}catch(_){draft.select();document.execCommand('copy');setMsg('rascunho copiado.')}};
+</script>
+</body>
+</html>
