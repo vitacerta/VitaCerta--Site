@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "learning_records": [],
+  "learning_schema": {
+    "required": ["learning_id", "article_id", "period_start", "period_end", "status", "created_at"],
+    "fields": [
+      "learning_id", "article_id", "publication_id", "opportunity_id", "period_start", "period_end",
+      "performance_metrics", "baseline_metrics", "comparisons", "observations", "validated_findings",
+      "hypotheses", "recommended_actions", "weight_adjustment_proposal", "status", "created_at", "updated_at"
+    ]
+  },
+  "allowed_status": ["AGUARDANDO_DADOS", "EM_ANALISE", "ANALISADO", "ACAO_APROVADA", "ENCERRADO"],
+  "policy": {
+    "automatic_weight_change": false,
+    "minimum_evidence_required": true,
+    "hypotheses_are_not_facts": true,
+    "missing_data_policy": "DADO NÃO DISPONÍVEL"
+  }
+}
