@@ -14,15 +14,25 @@ def slugify(s):
     return s[:90] or 'artigo'
 
 def section(labels,title):
+    # O título define o assunto principal. Labels antigos do Blogger servem apenas como apoio.
+    t=title.lower()
     x=(' '.join(labels+[title])).lower()
+
+    # Regras editoriais explícitas para temas que estavam sendo desviados por labels antigos.
+    if 'creatina' in t: return 'Nutrição'
+    if 'pernas' in t and ('pesad' in t or 'circula' in t): return 'Saúde'
+
     mente=['sono','dormindo','ansiedade','depress','tdah','pânico','panico','estresse','procrastina','meditação','meditacao','saúde mental','saude mental','terapia','cérebro','cerebro','foco','mau humor']
     movimento=['atividade física','atividade fisica','exercício','exercicio','treino','caminh','corrida','movimento','academia','dança','danca','alongamento','passos por dia','bicicleta','tempo sentado']
     longevidade=['longevid','envelhe','autonomia','menopausa','depois dos 40','após os 40','apos os 40']
     nutricao=['nutri','alimenta','dieta','suplement','creatina','vitamina','proteína','proteina','whey','magnésio','magnesio','ômega-3','omega-3','ferro','zinco','marmita','açúcar','acucar','jejum','café da manhã','cafe da manha','frutas vermelhas','chá',' cha ','saciedade','fome']
-    if any(k in x for k in mente): return 'Mente'
-    if any(k in x for k in movimento): return 'Movimento'
-    if any(k in x for k in longevidade): return 'Longevidade'
-    if any(k in x for k in nutricao): return 'Nutrição'
+
+    # Primeiro classifica pelo título, evitando que uma categoria histórica irrelevante domine o artigo.
+    for sec,terms in [('Mente',mente),('Nutrição',nutricao),('Movimento',movimento),('Longevidade',longevidade)]:
+        if any(k in t for k in terms): return sec
+    # Labels entram apenas como fallback quando o título não resolve.
+    for sec,terms in [('Mente',mente),('Nutrição',nutricao),('Movimento',movimento),('Longevidade',longevidade)]:
+        if any(k in x for k in terms): return sec
     return 'Saúde'
 
 def esc(s): return html.escape(s or '',quote=True)
@@ -99,7 +109,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
     path.write_text(src,encoding='utf-8')
 
 def main():
-    req=urllib.request.Request(FEED,headers={'User-Agent':'VitaCerta-Migrator/1.3'})
+    req=urllib.request.Request(FEED,headers={'User-Agent':'VitaCerta-Migrator/1.4'})
     raw=urllib.request.urlopen(req,timeout=30).read()
     root=ET.fromstring(raw)
     OUT.mkdir(exist_ok=True)
