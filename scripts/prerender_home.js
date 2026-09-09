@@ -6,7 +6,6 @@ const path = require('path');
   const file = path.resolve('index.html');
   let source = fs.readFileSync(file, 'utf8');
 
-  // Corrige metadados básicos antes da renderização.
   source = source.replace('<html lang="en">', '<html lang="pt-BR">');
   source = source.replace('<title>React Artifact</title>', '<title>VitaCerta | Saúde, Nutrição, Movimento, Mente e Longevidade</title>');
   if (!/name=["']description["']/i.test(source)) {
@@ -18,10 +17,31 @@ const path = require('path');
   const page = await browser.newPage({ viewport: { width: 1440, height: 1200 } });
   await page.goto('file://' + file, { waitUntil: 'load' });
   await page.waitForSelector('#root > *', { timeout: 15000 });
-  await page.waitForTimeout(1200);
 
-  // Mantém o HTML já renderizado no arquivo entregue ao crawler, sem remover
-  // o JavaScript original: o comportamento visual/interativo continua igual.
+  // O migrador injeta os artigos reais depois que o React monta a home.
+  // Esperamos explicitamente essa substituição antes de salvar o HTML final,
+  // evitando gravar novamente os cards genéricos do template.
+  try {
+    await page.waitForSelector('#conteudos[data-vc-live="1"]', { timeout: 10000 });
+  } catch (e) {
+    throw new Error('Artigos reais não foram aplicados à home antes da prerenderização.');
+  }
+  await page.waitForTimeout(300);
+
+  const badTitles = [
+    'Saúde e prevenção: o que você precisa saber',
+    'O papel da alimentação na saúde de longo prazo'
+  ];
+  const bodyText = await page.locator('body').innerText();
+  if (badTitles.some(t => bodyText.includes(t))) {
+    throw new Error('A home ainda contém cards genéricos do template.');
+  }
+
+  const realLinks = await page.locator('#conteudos a[href^="/conteudos/"]').count();
+  if (realLinks < 1) {
+    throw new Error('A home não contém links para artigos reais.');
+  }
+
   const rendered = await page.content();
   await browser.close();
 
@@ -29,5 +49,5 @@ const path = require('path');
     throw new Error('Prerenderização falhou: #root continuou vazio.');
   }
   fs.writeFileSync(file, rendered, 'utf8');
-  console.log('Home prerenderizada: conteúdo React agora existe no HTML inicial.');
+  console.log(`Home prerenderizada com ${realLinks} links de conteúdo real e sem cards genéricos.`);
 })();
