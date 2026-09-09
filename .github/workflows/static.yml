@@ -28,6 +28,12 @@ jobs:
         run: python3 scripts/migrate_blogger.py
       - name: Link institutional footer pages
         run: python3 scripts/link_footer.py
+      - name: Install prerender browser
+        run: |
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Prerender home for SEO
+        run: node scripts/prerender_home.js
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
